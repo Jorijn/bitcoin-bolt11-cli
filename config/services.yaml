@@ -1,0 +1,81 @@
+parameters:
+  application_title: 'Bitcoin BOLT #11 Tool'
+
+services:
+  ######################################################################
+  # CLI Commands
+  ######################################################################
+  command.buy:
+    class: Jorijn\Bitcoin\Bolt11\Command\DecodeCommand
+    arguments:
+      - '@payment_request.wrapper.encoder'
+      - '@serializer'
+    tags:
+      - { name: console.command, command: 'decode' }
+
+  ######################################################################
+  # The CLI application
+  ######################################################################
+  application:
+    class: Symfony\Component\Console\Application
+    public: true
+    arguments:
+      - '%application_title%'
+
+  ######################################################################
+  # Symfony Component wrapper for the BOLT11 library
+  ######################################################################
+  jorijn.payment_request.decoder:
+    class: Jorijn\Bitcoin\Bolt11\Encoder\PaymentRequestDecoder
+
+  jorijn.payment_request.denormalizer:
+    class: Jorijn\Bitcoin\Bolt11\Normalizer\PaymentRequestDenormalizer
+
+  payment_request.wrapper.encoder:
+    class: Jorijn\Bitcoin\Bolt11\Serializer\Encoder\PaymentRequestEncoder
+    arguments:
+      - "@jorijn.payment_request.decoder"
+    tags:
+      - serializer.encoder
+
+  payment_request.wrapper.normalizer:
+    class: Jorijn\Bitcoin\Bolt11\Serializer\Normalizer\PaymentRequestNormalizer
+    arguments:
+      - "@jorijn.payment_request.denormalizer"
+    tags:
+      - serializer.normalizer
+
+  ######################################################################
+  # Third Party Components
+  ######################################################################
+  serializer:
+    class: Symfony\Component\Serializer\Serializer
+    public: true
+    arguments:
+      - []
+      - []
+
+  serializer.encoder.json:
+    class: Symfony\Component\Serializer\Encoder\JsonEncoder
+    tags:
+      - serializer.encoder
+
+  serializer.encoder.xml:
+    class: Symfony\Component\Serializer\Encoder\XmlEncoder
+    tags:
+      - serializer.encoder
+
+  serializer.encoder.csv:
+    class: Symfony\Component\Serializer\Encoder\CsvEncoder
+    tags:
+      - serializer.encoder
+
+  serializer.encoder.yaml:
+    class: Symfony\Component\Serializer\Encoder\YamlEncoder
+    tags:
+      - serializer.encoder
+
+  serializer.normalizer.object:
+    class: Symfony\Component\Serializer\Normalizer\ObjectNormalizer
+    tags:
+      - serializer.normalizer

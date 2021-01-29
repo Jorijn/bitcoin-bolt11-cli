@@ -1,0 +1,54 @@
+{
+  "name": "jorijn/bitcoin-bolt11-cli",
+  "description": "A CLI tool for decoding lightning network payment requests as defined in BOLT #11",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Jorijn Schrijvershof",
+      "email": "jorijn@jorijn.com",
+      "homepage": "https://jorijn.com"
+    }
+  ],
+  "require": {
+    "php": "^7.4",
+    "jorijn/bitcoin-bolt11": "dev-develop",
+    "symfony/config": "^5.2",
+    "symfony/console": "^5.2",
+    "symfony/dependency-injection": "^5.2",
+    "symfony/dotenv": "^5.2",
+    "symfony/property-access": "^5.2",
+    "symfony/serializer": "^5.2",
+    "symfony/yaml": "^5.2",
+    "ext-json": "*"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "prefer-stable": true,
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {
+      "Jorijn\\Bitcoin\\Bolt11\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\Jorijn\\Bitcoin\\Bolt11\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit --testdox"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^2.17",
+    "phpunit/phpunit": "^9"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:Jorijn/bitcoin-bolt11.git"
+    }
+  ]
+}

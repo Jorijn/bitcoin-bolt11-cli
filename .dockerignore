@@ -1,0 +1,7 @@
+vendor
+docs
+var/cache/*
+.env
+.env.dist
+.php_cs
+.php_cs.cache
