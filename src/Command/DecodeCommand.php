@@ -19,7 +19,6 @@ class DecodeCommand extends Command
     public const DEFAULT_OUTPUT_FORMAT = 'json';
 
     protected SerializerInterface $serializer;
-
     protected DecoderInterface $decoder;
 
     public function __construct(DecoderInterface $decoder, SerializerInterface $serializer)
@@ -51,7 +50,6 @@ class DecodeCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $normalized = $this->decoder->decode($input->getArgument('payment-request'), 'bolt11');
         $format = $input->getOption('output-format') ?? self::DEFAULT_OUTPUT_FORMAT;
 
         if (!\in_array($format, self::SUPPORTED_FORMATS, true)) {
@@ -63,6 +61,8 @@ class DecodeCommand extends Command
 
             return 1;
         }
+
+        $normalized = $this->decoder->decode($input->getArgument('payment-request'), 'bolt11');
 
         if ($input->getOption('formatted')) {
             switch ($format) {

@@ -1,7 +1,5 @@
 .env
 vendor
 .php_cs.cache
-.vscode
-resources/xpub_derive/.idea
-resources/xpub_derive/venv
 .phpunit.result.cache
+.phpunit.cache
