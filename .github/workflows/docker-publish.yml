@@ -1,0 +1,49 @@
+name: Docker
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run tests
+        run: |
+            docker build . --file Dockerfile --target test
+
+  push:
+    needs: test
+
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+
+      - name: Log into registry
+        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u jorijn --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID=jorijn/bitcoin-bolt11
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+
+          docker tag jorijn/bitcoin-bolt11 jorijn/bitcoin-bolt11:$VERSION
+          docker push jorijn/bitcoin-bolt11:$VERSION

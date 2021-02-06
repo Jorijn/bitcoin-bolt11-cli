@@ -22,15 +22,10 @@ RUN composer install \
 ##################################################################################################################
 # Base Stage
 ##################################################################################################################
-FROM php:7.4-cli
+FROM php:7.4-cli-alpine AS php-base
 
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
-
-RUN apt-get update -y \
-    && apt-get install -y libgmp-dev file \
-    && ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/local/include/ \
-    && docker-php-ext-install -j$(nproc) gmp bcmath \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --update --no-cache gmp gmp-dev \
+    && docker-php-ext-install -j$(nproc) gmp bcmath
 
 COPY . /app/
 COPY --from=vendor /app/vendor/ /app/vendor/
@@ -39,6 +34,26 @@ WORKDIR /app/
 
 COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
+
+##################################################################################################################
+# Test Stage
+##################################################################################################################
+FROM php-base AS test
+
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+COPY --from=vendor /usr/bin/composer /usr/bin/composer
+
+# run the test script(s) from composer, this validates the application before allowing the build to succeed
+RUN composer install --no-interaction --no-plugins --no-scripts --prefer-dist --no-ansi --ignore-platform-reqs
+RUN vendor/bin/phpunit --testdox
+
+##################################################################################################################
+# Production Stage
+##################################################################################################################
+FROM php-base AS production
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # compile the container for performance reasons
 RUN /app/bin/bolt11 >/dev/null
